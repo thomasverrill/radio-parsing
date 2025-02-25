@@ -5,8 +5,7 @@ import csv
 import matplotlib.pyplot as plt
 from collections import Counter
 
-#  variable to store the Spinitron URL
-
+#  DJ urls
 urls = {
     "thoge": "https://playlists.wprb.com/WPRB/dj/173612/thoge?layout=1&page=1",
     "Abe": "https://playlists.wprb.com/WPRB/dj/172622/Abe?layout=1&page=1",
@@ -74,9 +73,9 @@ urls = {
     "DJ Catemoji": "https://playlists.wprb.com/WPRB/dj/184715/DJ-Catemoji?layout=1&page=1",
     "DJ NEM": "https://playlists.wprb.com/WPRB/dj/160512/DJ-NEM?layout=1&page=1",
 }
-url_keys = list(urls.keys())
-dj_rhcounts = {}
-# "" :  "?layout=1&page=1",
+
+dj_names = list(urls.keys()) # list of DJ names
+
 test_playlist_url = (
     "https://playlists.wprb.com/WPRB/pl/19206992/The-Laboratory?layout=1"
 )
@@ -198,7 +197,7 @@ def top_artists_pie_chart(dj_name="thoge", threshold=5):
     # # Add the 'Other' category
     # filtered_artists['Other'] = other_artists_count
 
-    # Step 4: Plot the pie chart
+    # Plot the pie chart
     plt.figure(figsize=(10, 8))
     filtered_artists.plot.pie(autopct="%1.1f%%", startangle=140)
     plt.title(f"Artists Played at least {threshold} times ({dj_name})")
@@ -213,33 +212,29 @@ def top_songs(dj_name="thoge", threshold=2):
     df = pd.read_csv(f"dj_songs/{dj_name}_songs.csv")
     artist_song_counts = df["Song"].value_counts()
 
-    # Step 3: Filter artists with more than one song and combine the rest into 'Other'
+    # Filter artists with more than one song and combine the rest into 'Other'
     filtered_songs = artist_song_counts[artist_song_counts > threshold]
     other_songs_count = artist_song_counts[artist_song_counts <= threshold].sum()
 
-    # Step 4: Plot the pie chart
+    # Plot the pie chart
     print(filtered_songs)
 
 
 def top_n_artist_players(artist_name="Radiohead", n=10):
-    for dj_name in url_keys:
+    dj_artist_counts = {}
+    for dj_name in dj_names:
         if not (dj_name in urls.keys()):
             print(f"no songs yet for {dj_name}")
             return
         df = pd.read_csv(f"dj_songs/{dj_name}_songs.csv")
-        radiohead_count = df["Artist"].value_counts().get(artist_name, 0)
-        dj_rhcounts[dj_name] = radiohead_count
-    top_5_djs = Counter(dj_rhcounts).most_common(n)
+        artist_count = df["Artist"].value_counts().get(artist_name, 0)
+        dj_artist_counts[dj_name] = artist_count
+    top_n_djs = Counter(dj_artist_counts).most_common(n)
     print(f"Top {n} DJs who have played {artist_name} the most:")
-    for dj, count in top_5_djs:
+    for dj, count in top_n_djs:
         print(f"{dj}: {count} plays")
 
 
 # main function
 if __name__ == "__main__":
     top_n_artist_players("Squid", 10)
-    # for dj_name in url_keys[4:]: # still need to do Pat's
-    #     dj_name_to_csv(dj_name=dj_name)
-    #     break
-    # dj_name_to_csv(dj_name="DJ NEM")
-    # top_artists_pie_chart(dj_name="Abe", threshold=5)
